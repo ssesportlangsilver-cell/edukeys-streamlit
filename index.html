@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EduKeys v3 • Login → Home → Fullscreen Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Topbar (hide on login) -->
+  <div id="topbar" class="topbar hidden">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <div style="font-weight:700">EduKeys v3 — เกมฝึกคีย์บอร์ด</div>
+        <div class="muted">ธีมนีออน •  Login / Home / Game</div>
+      </div>
+    </div>
+    <nav>
+      <button class="nav-btn" data-goto="#/home">หน้าบ้าน</button>
+      <button class="nav-btn" data-goto="#/results">ผล/รายชื่อ</button>
+      <button id="btnPlayQuick" class="nav-btn primary" data-goto="#/game">เริ่มเล่นเกม</button>
+      <button id="btnLogout" class="nav-btn">ออกจากระบบ</button>
+    </nav>
+  </div>
+
+  <!-- LOGIN -->
+  <section id="route-login" class="section login-wrap">
+    <div class="card">
+      <h2 class="h2">🔐 ล็อกอินเข้าใช้งาน</h2>
+      <p class="muted">กรอกข้อมูลให้ครบ ระบบจะบันทึกลงรายชื่อและใช้ตั้งชื่อผู้เล่นอัตโนมัติ</p>
+      <div class="grid" style="margin-top:10px">
+        <div class="field"><label>ชื่อ</label><input id="inFirst" placeholder="เช่น อานันท์"/></div>
+        <div class="field"><label>นามสกุล</label><input id="inLast" placeholder="เช่น วัฒนชัย"/></div>
+        <div class="field"><label>ชั้น</label><input id="inClass" placeholder="เช่น ม.5/3 หรือ CS101"/></div>
+        <div class="field"><label>เลขที่</label><input id="inNo" type="number" placeholder="เช่น 12"/></div>
+      </div>
+      <div class="row gap">
+        <button id="btnLogin" class="btn primary">✅ เข้าสู่ระบบ</button>
+        <button id="btnExportStudentsLogin" class="btn">⬇️ ส่งออกรายชื่อ (Excel)</button>
+        <button id="btnClearStudentsLogin" class="btn warn">🗑 ลบรายชื่อทั้งหมด</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ชื่อ-สกุล</th><th>ชั้น</th><th>เลขที่</th><th>เวลา</th></tr></thead>
+          <tbody id="tblStudentsLogin"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOME -->
+  <section id="route-home" class="section hidden">
+    <div class="home-head">
+      <div>
+        <div class="welcome">ยินดีต้อนรับ, <strong id="who"></strong></div>
+        <div class="muted">กด “เริ่มเล่นเกม” เพื่อเข้าโหมดเต็มหน้าจอ หรือจัดการผล/รายชื่อได้จากเมนู</div>
+      </div>
+      <div>
+        <button class="btn primary" data-goto="#/game">▶️ เริ่มเล่นเกม</button>
+      </div>
+    </div>
+    <div class="tiles">
+      <div class="tile big">
+        <div class="title">หน้าต่างลิงก์ห้องเรียน</div>
+        <div class="links">
+          <a href="#" target="_blank">📄 ใบงานที่ 1: โฮมโรว์และการวางมือ</a>
+          <a href="#" target="_blank">🎥 วิดีโอ: เทคนิคมองหน้าจอไม่ก้มคีย์บอร์ด</a>
+          <a href="#" target="_blank">🧪 แบบทดสอบก่อนเรียน (Google Forms)</a>
+          <a href="#" target="_blank">🧠 คลังคำศัพท์คอมพิวเตอร์ (Google Sheets)</a>
+        </div>
+      </div>
+      <div class="tile">
+        <div class="title">สรุปผลล่าสุด</div>
+        <table>
+          <thead><tr><th>เวลา</th><th>ชื่อ</th><th>คะแนน</th><th>Acc</th><th>สถานะ</th></tr></thead>
+          <tbody id="tblLatest"></tbody>
+        </table>
+        <div class="row gap">
+          <button id="btnExportResultsHome" class="btn">⬇️ ส่งออกผล (Excel)</button>
+          <button id="btnClearResultsHome" class="btn warn">🗑 ลบผลทั้งหมด</button>
+        </div>
+      </div>
+      <div class="tile">
+        <div class="title">เกณฑ์ผ่านเริ่มต้น</div>
+        <div class="grid two">
+          <div class="field"><label>คะแนน ≥</label><input id="minScoreHome" value="25"/></div>
+          <div class="field"><label>Accuracy ≥ (%)</label><input id="minAccHome" value="85"/></div>
+        </div>
+        <p class="muted">ค่าดังกล่าวจะใช้เป็นค่าเริ่มต้นในโหมดเกม (แก้ได้ในหน้าเกม)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FULLSCREEN GAME -->
+  <section id="route-game" class="game-wrap hidden" aria-hidden="true">
+    <canvas id="game" class="canvas"></canvas>
+    <div class="hud" id="hudLeft">
+      <div class="chip">⏱ เวลา: <strong id="statTime">01:00</strong></div>
+      <div class="chip">✅ คะแนน: <strong id="statScore">0</strong></div>
+      <div class="chip">❌ พลาด: <strong id="statMiss">0</strong></div>
+      <div class="chip">🎯 Accuracy: <strong id="statAcc">100%</strong></div>
+      <div class="chip">⌨️ WPM: <strong id="statSpeed">0</strong></div>
+    </div>
+    <div class="hud-right">
+      <button id="btnBackHome" class="nav-btn">🏠 ออกจากเกม</button>
+      <button id="btnPause" class="nav-btn">⏸ หยุด</button>
+      <button id="btnReset" class="nav-btn">🔄 รีเซ็ต</button>
+      <button id="btnStart" class="nav-btn primary">▶️ เริ่ม</button>
+    </div>
+    <div class="bottom-bar">
+      <div class="controls">
+        <div class="field"><label>โหมด</label>
+          <select id="mode" class="nav-btn"><option value="letters">ตัวอักษรตก</option><option value="words">พิมพ์คำศัพท์</option></select>
+        </div>
+        <div class="field"><label>ความยาก</label>
+          <select id="difficulty" class="nav-btn"><option value="easy">ง่าย</option><option value="normal" selected>ปกติ</option><option value="hard">ยาก</option></select>
+        </div>
+        <div class="field"><label>เวลา (วินาที)</label>
+          <select id="timeLimit" class="nav-btn"><option>30</option><option selected>60</option><option>120</option></select>
+        </div>
+        <div class="field"><label>ชุดคำ (โหมดคำ)</label>
+          <select id="wordSet" class="nav-btn"><option value="basic" selected>พื้นฐาน</option><option value="tech">เทคโนโลยี</option><option value="thai">คำไทยทับศัพท์ง่าย</option></select>
+        </div>
+        <div class="field"><label>ชื่อผู้เล่น</label>
+          <input id="studentName" class="nav-btn" style="min-width:280px" readonly />
+        </div>
+        <div class="field"><label>เกณฑ์: คะแนน ≥ / Accuracy ≥</label>
+          <div class="row">
+            <input id="minScore" class="nav-btn" type="number" value="25" style="width:90px"/>
+            <input id="minAcc" class="nav-btn" type="number" value="85" style="width:90px"/>
+          </div>
+        </div>
+        <div class="field" id="wrapWordInput" style="display:none"><label>พิมพ์คำ (โหมดคำ)</label>
+          <input id="wordInputFS" class="nav-btn" placeholder="พิมพ์คำแล้วกด Enter" style="min-width:260px" />
+        </div>
+      </div>
+      <div class="panel pad">
+        <div id="kbd" class="kbd"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS PAGE -->
+  <section id="route-results" class="section hidden">
+    <h2 class="h2">📊 สรุปผล/รายชื่อ</h2>
+    <div class="row gap">
+      <button id="btnExportStudents" class="btn">⬇️ ส่งออกรายชื่อ (Excel)</button>
+      <button id="btnExportResults" class="btn">⬇️ ส่งออกผลเล่นเกม (Excel)</button>
+      <button id="btnClearStudents" class="btn warn">🗑 ลบรายชื่อทั้งหมด</button>
+      <button id="btnClearResults" class="btn warn">🗑 ลบผลทั้งหมด</button>
+    </div>
+    <div class="tiles">
+      <div class="tile big">
+        <div class="title">รายชื่อผู้ใช้งาน</div>
+        <table>
+          <thead><tr><th>ชื่อ-สกุล</th><th>ชั้น</th><th>เลขที่</th><th>เวลา</th></tr></thead>
+          <tbody id="tblStudents"></tbody>
+        </table>
+      </div>
+      <div class="tile big">
+        <div class="title">ผลการเล่น</div>
+        <table>
+          <thead><tr><th>เวลา</th><th>ชื่อ</th><th>โหมด</th><th>คะแนน</th><th>พลาด</th><th>Acc</th><th>WPM</th><th>ผ่าน</th></tr></thead>
+          <tbody id="tblResults"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
